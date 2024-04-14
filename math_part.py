@@ -1,52 +1,53 @@
 import math
+class MathFunctions:
 
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    math_list : list = []
+
+    def __init__(self, *input_data) -> None:
+        data_list = list(input_data)
+        self.math_list = data_list
+
+    def distance(self) -> float:
+        return ((self.math_list[2] - self.math_list[0]) ** 2 + (self.math_list[3] - self.math_list[1]) ** 2) ** 0.5
     
-def distance_between_two_points(a: Point, b: Point):
-    dx = (a.x - b.x) ** 2
-    dy = (a.y - b.y) ** 2
-    return (dx + dy) ** 0.5 
-
-def straight_linear_angular_serif(a: Point, distance, angle):
-    angle = math.radians(angle)
-    dx = distance * math.cos(angle)
-    dy = distance * math.sin(angle)
-    x = a.x + dx
-    y = a.y + dy
-    return Point(x, y)
-
-def reverse_linear_angular_notching(a: Point, b: Point):
-    d = distance_between_two_points(a, b)
-    dx = abs(a.x - b.x)
-    angle = math.acos(dx / d)
-    return math.degrees(angle)
-
-def angle_between_straight_lines(a: Point, b: Point, c: Point, d: Point):
-    k_ab = k_factor(a, b)
-    k_cd = k_factor(c, d)
-
-    if k_ab == -1 and k_cd == -1:
-        if b.x - a.x == d.x - c.x == 0 or b.y - a.y == d.y - c.y == 0:
-            angle = 0
-        else:
-            angle = 90
-    elif k_ab == -1:
-        angle = math.degrees(math.atan(k_cd))
-    elif k_cd == -1:
-        angle = math.degrees(math.atan(k_ab))
-    else:
-        angle = math.degrees(math.atan((abs(k_cd - k_ab) / (1 + k_ab * k_cd))))
-
-    if angle > 90:
-        return 180 - angle 
-    return angle
-
-def k_factor(a: Point, b: Point):
-    k_ab = b.y - a.y
-    if b.x - a.x == 0 or b.y - a.y == 0:
-        return -1
-    k_ab /= (b.x - a.x)
-    return k_ab
+    def hyp_cordinates(self) -> tuple:
+        return (
+            self.math_list[0] + self.math_list[2] * math.cos(math.radians(self.math_list[3])),
+            self.math_list[1] + self.math_list[2] * math.sin(math.radians(self.math_list[3])))
+    
+    def find_ang(self) -> float:
+        if self.math_list[0] == self.math_list[2]:
+            return 90
+        if self.math_list[1] == self.math_list[3] and self.math_list[2] < self.math_list[0]:
+            return 180
+        if self.math_list[1] == self.math_list[3] and self.math_list[2] > self.math_list[0]:
+            return 0
+        dist = ((self.math_list[2] - self.math_list[0]) ** 2 +
+                (self.math_list[3] - self.math_list[1]) ** 2) ** 0.5
+        return math.degrees(math.acos((self.math_list[2] - self.math_list[0])/dist))
+    
+    #пересечение окружности и прямой
+    def circle_straigth(self) -> list:
+        straight_k = (self.math_list[3] - self.math_list[1])/ (self.math_list[2] - self.math_list[0])
+        straight_b = self.math_list[3] - straight_k * self.math_list[2]
+        asq = 1 + straight_k ** 2
+        bsq = 2 * (-self.math_list[4] + straight_k * (straight_b - self.math_list[5]))
+        csq = self.math_list[4] ** 2 + (straight_b - self.math_list[5]) ** 2 - self.math_list[6] ** 2
+        if bsq ** 2 - 4 * asq * csq > 0:
+            ret_x1 = (- bsq + (bsq ** 2 - 4 * asq * csq) ** 0.5)/(2 * asq)
+            ret_x2 = (- bsq - (bsq ** 2 - 4 * asq * csq) ** 0.5)/(2 * asq)
+            return [ret_x1, straight_k * ret_x1 + straight_b, ret_x2,
+                    straight_k * ret_x2 + straight_b]
+        if bsq ** 2 - 4 * asq * csq == 0:
+            ret_x = 0.5 * bsq/asq
+            return [ret_x, straight_k * ret_x + straight_b]
+        return None
+    
+    def parallel_straight(self) -> tuple:
+        straight_k = (self.math_list[3] - self.math_list[1]) / (self.math_list[2] - self.math_list[0])
+        straight_b = self.math_list[5] - straight_k * self.math_list[4]
+        return straight_k, straight_b
+    
+    #угол упреждения
+    def method_ang(self) -> float:
+        return math.degrees(math.asin((self.math_list[0] * math.sin(math.radians(self.math_list[1]))) / self.math_list[2]))
