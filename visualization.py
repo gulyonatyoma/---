@@ -65,4 +65,3 @@ class Visualise:
         
         anim = animation.FuncAnimation(fig=fig, func=update, frames=200, interval=50)
         plt.show()
-        
